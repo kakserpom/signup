@@ -188,6 +188,7 @@ switch ($act) {
                     "user_login" => $_POST['login'],
                     "user_password" => md5(md5(trim($_POST['password']))),
                     "referal" => isset($_COOKIE['referal']) ? $_COOKIE['referal'] : 0,
+                    'status' => 1
                 );
                 $user['activation'] = md5($user['user_login'] . time());
                 $allowed = array('user_login', 'user_name', 'user_password', 'activation', 'referal');
