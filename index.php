@@ -21,22 +21,22 @@ switch ($act) {
         break;
     case 'forgot':
         if (isset($_GET['code'])) {
-            if ($_GET['code'] == '0') header("Location: /");
+            if ($_GET['code'] == '0') {
+                header("Location: /");
+                return;
+            }
             $cod = isValidMd5($_GET['code']);
             if ($cod == 1) {
                 $use = $db->getRow("SELECT * FROM `users` WHERE `forgotten` = ?s LIMIT 1", $_GET['code']);
             }
             if (!isset($use['user_login'])) {
                 header("Location: /");
+                return;
             }
             if (isset($_POST['pass'])) {
                 $sql = "UPDATE users SET user_password = ?s, forgotten=0 WHERE user_id = ?i";
                 $db->query($sql, md5(md5($_POST['pass'])), $use['user_id']);
-
-
                 Send_Mail($use['user_login'], 'Новый пароль ' . $_SERVER['HTTP_HOST'], $use['user_name'] . ", Вы успешно воспользовались процедурой восстановления пароля.\nВаш логин: " . $use['user_login'] . "\nВаш новый пароль: " . $_POST['pass']);
-
-
                 $msg->success(__("saved_password"), "/login");
             }
             $options['title'] = __('Восстановление пароля');
@@ -46,10 +46,6 @@ switch ($act) {
             $tpl->getFoot($options);
         } else {
             if (isset($_POST['email'])) {
-
-                if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/", $_POST['email'])) {
-                    $msg->error(__("login_error"), '/login/forgot');
-                }
                 if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
                     $msg->error(__("Формат email неверен"), '/login/forgot');
                 }
@@ -155,9 +151,6 @@ switch ($act) {
         if (isset($_POST['submit'])) {
             $err = array();
             # проверям логин
-            if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/", $_POST['login'])) {
-                $msg->error(__('login_error'), '/login/signup');
-            }
             if (!preg_match("~^[a-zA-Zа-яА-Я0-9-_]+[\s]{0,1}[a-zA-Zа-яА-Я0-9-_]*$~", $_POST['name'])) {
                 $msg->error(__('login_error'), '/login/signup');
             }
@@ -214,6 +207,7 @@ switch ($act) {
     default:
         if (isset($userdata)) {
             header('Location: /cabinet/');
+            return;
         }
         $options['title'] = __('Офис | GodfatherBlog');
         $tpl->getHead($options);
